@@ -53,6 +53,23 @@ rule token = parse
   | "{"  { BEGIN }
   | "}"  { END }
 
+  (*Symbols*)
+  | "+"  { PLUS }
+  | "-"  { MINUS }
+  | "*"  { STAR }
+  | "/"  { SLASH }
+  | "%"  { PERCENT }
+  | "=="  { EQ }
+  | "!="  { NEQ }
+  | "<"  { LT }
+  | ">"  { GT }
+  | "<="  { LE }
+  | ">="  { GE }
+  | "&&" { AND }
+  | "||" { OR }
+  | "!"  { NOT }
+  | "="  { ASSIGN }
+
   | _    { raise (Error ("unknown character : " ^ lexeme lexbuf)) }
   | eof  { EOF }
 
