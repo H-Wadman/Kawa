@@ -7,9 +7,10 @@
 
 %token <int> INT
 %token <string> IDENT
-%token MAIN
+(*Keywords except types*)
+%token TRUE FALSE VAR ATTRIBUTE METHOD CLASS NEW THIS IF ELSE WHILE RETURN PRINT TINT TBOOL TVOID MAIN
+
 %token LPAR RPAR BEGIN END SEMI
-%token PRINT
 %token EOF
 
 %start program
