@@ -6,7 +6,7 @@
   exception Error of string
 
   let keyword_or_ident =
-  let h = Hashtbl.create 17 in
+  let h = Hashtbl.create 18 in
   List.iter (fun (s, k) -> Hashtbl.add h s k)
     [ "true",       TRUE;
       "false",      FALSE;
@@ -25,6 +25,7 @@
       "bool",       TBOOL;
       "void",       TVOID;
       "main",       MAIN;
+      "extends",    EXTENDS;
     ] ;
   fun s ->
     try  Hashtbl.find h s
