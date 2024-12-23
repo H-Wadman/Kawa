@@ -113,6 +113,23 @@ unop:
   | MINUS { Opp }
 ;
 
+%inline binop:
+  | PLUS { Add }
+  | MINUS { Sub }
+  | STAR { Mul }
+  | SLASH { Div }
+  | PERCENT { Rem }
+  | EQ { Eq }
+  | NEQ { Neq }
+  | LT { Lt }
+  | GT { Gt }
+  | LE { Le }
+  | GE { Ge }
+  | AND { And }
+  | OR { Or }
+;
+
+
 expression:
 | n=INT { Int(n) }
 | b=TRUE { Bool(true) }
@@ -120,19 +137,7 @@ expression:
 | THIS { This }
 | m=mem { Get (m) }
 | op=unop expr=expression { Unop (op, expr)}
-| e1=expression PLUS e2=expression { Binop (Add, e1, e2) } %prec PLUS
-| e1=expression MINUS e2=expression { Binop (Sub, e1, e2) } %prec MINUS
-| e1=expression STAR e2=expression { Binop (Mul, e1, e2) } %prec STAR
-| e1=expression SLASH e2=expression { Binop (Div, e1, e2) } %prec SLASH
-| e1=expression PERCENT e2=expression { Binop (Rem, e1, e2) } %prec PERCENT
-| e1=expression EQ e2=expression { Binop (Eq, e1, e2) } %prec EQ
-| e1=expression NEQ e2=expression { Binop (Neq, e1, e2) } %prec NEQ
-| e1=expression LT e2=expression { Binop (Lt, e1, e2) } %prec LT
-| e1=expression GT e2=expression { Binop (Gt, e1, e2) } %prec GT
-| e1=expression LE e2=expression { Binop (Le, e1, e2) } %prec LE
-| e1=expression GE e2=expression { Binop (Ge, e1, e2) } %prec GE
-| e1=expression AND e2=expression { Binop (And, e1, e2) } %prec AND
-| e1=expression OR e2=expression { Binop (Or, e1, e2) } %prec OR
+| e1=expression op=binop e2=expression { Binop (op, e1, e2) }
 | LPAR e=expression RPAR { e }
 | NEW id=IDENT { New (id) }
 | NEW id=IDENT LPAR args=separated_list(COMMA, expression) RPAR { NewCstr (id, args) }
