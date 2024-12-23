@@ -54,7 +54,7 @@ rule token = parse
   | "{"  { BEGIN }
   | "}"  { END }
 
-  (*Symbols*)
+  (*Binary op symbols*)
   | "+"  { PLUS }
   | "-"  { MINUS }
   | "*"  { STAR }
@@ -69,6 +69,7 @@ rule token = parse
   | "&&" { AND }
   | "||" { OR }
   | "!"  { NOT }
+
   | "="  { ASSIGN }
 
   | _    { raise (Error ("unknown character : " ^ lexeme lexbuf)) }
