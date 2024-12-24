@@ -34,16 +34,11 @@ let typecheck_prog p =
       check e TBool tenv;
       TBool
     | Binop (op, e1, e2) -> check_binop op e1 e2
-    | Get (Var x) -> Env.find x tenv
-    | Get (Field (e, x)) ->
-      (match type_expr e tenv with
-       | TClass c ->
-         let cls = List.find (fun def -> def.class_name = c) p.classes in
-         cls.attributes |> List.find (fun attr -> fst attr = x) |> fun attr -> snd attr
-       | _ -> error "Cannot access field on non-class type")
+    | Get m -> type_mem_access m tenv
     | This -> Env.find "this" tenv
-    | New cls -> TClass cls
-    | NewCstr (cls, args) -> failwith "not ready"
+    | New cls ->
+        if List.exists (fun c -> c.class_name = cls) p.classes then TClass cls else failwith (Printf.sprintf "New called with class %s which does not exist" cls)
+    | NewCstr (cls, args) -> check_constructor cls args tenv
     | MethCall (e, m, args) -> check_meth_call e m args tenv
   and check_binop op e1 e2 =
     match op with
@@ -115,13 +110,28 @@ let typecheck_prog p =
             else List.iter2 (fun arg param -> check arg (snd param) tenv) args mdef.params;
             mdef.return))
     | _ -> error "method call on non-object"
+  and check_constructor cls args tenv =
+    let cdef = List.find (fun def -> def.class_name = cls) p.classes in
+    let cstr = List.find_opt (fun mdef -> mdef.method_name = "constructor") cdef.methods in
+    match cstr with
+    | None -> failwith (Printf.sprintf "Constructor for class %s not found" cls)
+    | Some cstr ->
+      if List.length cstr.params <> List.length args
+      then
+        failwith
+          (Printf.sprintf
+             "Constructor of class %s was applied with the wrong number of arguments"
+             cls)
+      else List.iter2 (fun arg param -> check arg (snd param) tenv) args cstr.params; if cstr.return = TVoid then TClass cls else failwith "Constructor must return void"
   and type_mem_access m tenv =
     match m with
     | Var x -> Env.find x tenv
     | Field (e, x) ->
       (match type_expr e tenv with
-       | TClass c -> failwith "not ready"
-       | _ -> failwith "case not implemented in type_mem_access")
+       | TClass c ->
+         let cls = List.find (fun def -> def.class_name = c) p.classes in
+         cls.attributes |> List.find (fun attr -> fst attr = x) |> fun attr -> snd attr
+       | _ -> error "Cannot access field on non-class type")
   in
   let rec check_instr i ret tenv =
     match i with
