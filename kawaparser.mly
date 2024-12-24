@@ -28,7 +28,14 @@
 %left LT GT LE GE
 %left PLUS MINUS
 %left STAR SLASH PERCENT
+
+%nonassoc UNARY
+
 %left DOT
+%left FIELD
+
+%nonassoc LPAR
+
 
 %start program
 %type <Kawa.program> program
@@ -105,8 +112,9 @@ instruction:
 
 mem:
   | id=IDENT { Var(id) }
-  | expr=expression DOT id=IDENT { Field (expr, id) }
+  | expr=expression DOT id=IDENT { Field (expr, id) } %prec FIELD
 ;
+
 unop:
   | NOT { Not }
   (* Will give priorty issues later with Sub *)
@@ -136,10 +144,10 @@ expression:
 | b=FALSE { Bool(false) }
 | THIS { This }
 | m=mem { Get (m) }
-| op=unop expr=expression { Unop (op, expr)}
+| op=unop expr=expression { Unop (op, expr)} %prec UNARY
 | e1=expression op=binop e2=expression { Binop (op, e1, e2) }
 | LPAR e=expression RPAR { e }
-| NEW id=IDENT { New (id) }
+| NEW id=IDENT { New (id) } %prec UNARY
 | NEW id=IDENT LPAR args=separated_list(COMMA, expression) RPAR { NewCstr (id, args) }
 | e=expression DOT id=IDENT LPAR args=separated_list(COMMA, expression) RPAR { MethCall (e, id, args) }
 ;
