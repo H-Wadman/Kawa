@@ -72,6 +72,9 @@ rule token = parse
 
   | "="  { ASSIGN }
 
+  | "."  { DOT }
+  | "," { COMMA }
+
   | _    { raise (Error ("unknown character : " ^ lexeme lexbuf)) }
   | eof  { EOF }
 

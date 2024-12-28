@@ -81,9 +81,9 @@ method_def:
 ;
 
 class_def:
-| CLASS id=IDENT BEGIN attr=list(attribute_decl) meth=list(method_def)
+| CLASS id=IDENT BEGIN attr=list(attribute_decl) meth=list(method_def) END
     { {class_name=id; attributes=attr; methods=meth; parent=None} }
-| CLASS id=IDENT EXTENDS prnt=IDENT BEGIN attr=list(attribute_decl) meth=list(method_def)
+| CLASS id=IDENT EXTENDS prnt=IDENT BEGIN attr=list(attribute_decl) meth=list(method_def) END
     { {class_name=id; attributes=attr; methods=meth; parent=(Some (prnt)) } }
 ;
 
@@ -106,7 +106,7 @@ instruction:
   | m=mem ASSIGN e=expression SEMI { Set(m, e) }
   | IF LPAR e=expression RPAR BEGIN ins_if=list(instruction) ELSE BEGIN ins_else=list(instruction) END { If (e, ins_if, ins_else) }
   | WHILE LPAR e=expression RPAR BEGIN inst=list(instruction) END { While (e, inst) }
-  | RETURN e=expression { Return (e) } %prec RETURN
+  | RETURN e=expression SEMI { Return (e) } %prec RETURN
   | e=expression SEMI { Expr(e) }
 ;
 
