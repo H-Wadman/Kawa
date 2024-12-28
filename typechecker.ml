@@ -18,6 +18,23 @@ type tenv = typ Env.t
 
 let add_env l tenv = List.fold_left (fun env (x, t) -> Env.add x t env) tenv l
 
+let check_subclass t base class_list =
+  let get_class c = List.find (fun x -> x.class_name = c) class_list in
+  let rec aux c_def base =
+    if c_def.class_name <> base
+    then (
+      match c_def.parent with
+      | None ->
+        failwith (Printf.sprintf "%s is not a subclass of %s" c_def.class_name base)
+      | Some p -> aux (get_class p) base)
+  in
+  match t, base with
+  | TInt, _ | TBool, _ | TVoid, _ ->
+    if t <> base then failwith "Basic types cannot be subclasses"
+  | TClass c, TClass c2 -> aux (get_class c) c2
+  | _, _ -> failwith "Class cannot inherit from basic types"
+;;
+
 let typecheck_prog p =
   let tenv = add_env p.globals Env.empty in
   let rec check e typ tenv =
@@ -37,7 +54,9 @@ let typecheck_prog p =
     | Get m -> type_mem_access m tenv
     | This -> Env.find "this" tenv
     | New cls ->
-        if List.exists (fun c -> c.class_name = cls) p.classes then TClass cls else failwith (Printf.sprintf "New called with class %s which does not exist" cls)
+      if List.exists (fun c -> c.class_name = cls) p.classes
+      then TClass cls
+      else failwith (Printf.sprintf "New called with class %s which does not exist" cls)
     | NewCstr (cls, args) -> check_constructor cls args tenv
     | MethCall (e, m, args) -> check_meth_call e m args tenv
   and check_binop op e1 e2 =
@@ -107,12 +126,19 @@ let typecheck_prog p =
                    "Method %s of class %s was applied with the wrong number of arguments"
                    m
                    c)
-            else List.iter2 (fun arg param -> check arg (snd param) tenv) args mdef.params;
+            else
+              List.iter2
+                (fun arg param ->
+                  check_subclass (type_expr arg tenv) (snd param) p.classes)
+                args
+                mdef.params;
             mdef.return))
     | _ -> error "method call on non-object"
   and check_constructor cls args tenv =
     let cdef = List.find (fun def -> def.class_name = cls) p.classes in
-    let cstr = List.find_opt (fun mdef -> mdef.method_name = "constructor") cdef.methods in
+    let cstr =
+      List.find_opt (fun mdef -> mdef.method_name = "constructor") cdef.methods
+    in
     match cstr with
     | None -> failwith (Printf.sprintf "Constructor for class %s not found" cls)
     | Some cstr ->
@@ -122,10 +148,19 @@ let typecheck_prog p =
           (Printf.sprintf
              "Constructor of class %s was applied with the wrong number of arguments"
              cls)
-      else List.iter2 (fun arg param -> check arg (snd param) tenv) args cstr.params; if cstr.return = TVoid then TClass cls else failwith "Constructor must return void"
+      else
+        List.iter2
+          (fun arg param -> check_subclass (type_expr arg tenv) (snd param) p.classes)
+          args
+          cstr.params;
+      if cstr.return = TVoid then TClass cls else failwith "Constructor must return void"
   and type_mem_access m tenv =
     match m with
-    | Var x -> Env.find x tenv
+    | Var x ->
+      Env.find_opt x tenv
+      |> (function
+       | Some t -> t
+       | None -> failwith (Printf.sprintf "Variable %s not found" x))
     | Field (e, x) ->
       (match type_expr e tenv with
        | TClass c ->
@@ -134,9 +169,19 @@ let typecheck_prog p =
        | _ -> error "Cannot access field on non-class type")
   in
   let rec check_instr i ret tenv =
+    let check_seq = List.iter (fun i -> check_instr i ret tenv) in
     match i with
     | Print e -> check e TInt tenv
-    | _ -> failwith "case not implemented in check_instr"
+    | Set (m, e) ->
+      let t = type_mem_access m tenv in
+      check_subclass (type_expr e tenv) t p.classes
+    | If (e, seq1, seq2) ->
+      check e TBool tenv;
+      check_seq seq1;
+      check_seq seq2
+    | While (e, seq) -> check e TBool tenv; check_seq seq
+    | Return e -> check e ret tenv
+    | Expr e -> check e TVoid tenv
   and check_seq s ret tenv = List.iter (fun i -> check_instr i ret tenv) s in
   check_seq p.main TVoid tenv
 ;;
