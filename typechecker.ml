@@ -50,7 +50,8 @@ let typecheck_prog p =
     | Unop (Not, e) ->
       check e TBool tenv;
       TBool
-    | Binop (op, e1, e2) -> check_binop op e1 e2
+    | Binop (op, e1, e2) -> 
+      check_binop op e1 e2 tenv
     | Get m -> type_mem_access m tenv
     | This -> Env.find "this" tenv
     | New cls ->
@@ -59,7 +60,7 @@ let typecheck_prog p =
       else failwith (Printf.sprintf "New called with class %s which does not exist" cls)
     | NewCstr (cls, args) -> check_constructor cls args tenv
     | MethCall (e, m, args) -> check_meth_call e m args tenv
-  and check_binop op e1 e2 =
+  and check_binop op e1 e2 tenv =
     match op with
     | Add ->
       check e1 TInt tenv;
@@ -109,30 +110,33 @@ let typecheck_prog p =
       check e2 TBool tenv;
       TBool
   and check_meth_call e m args tenv =
+    let rec find_method c m =
+          let cdef = List.find (fun def -> def.class_name = c) p.classes in
+          let comp meth = meth.method_name = m in
+          if List.exists comp cdef.methods
+          then List.find comp cdef.methods
+          else (
+            try find_method (Option.get cdef.parent) m with
+            | Invalid_argument _ ->
+              failwith (Printf.sprintf "Method %s not defined for class %s" m c))
+    in
     let t = type_expr e tenv in
     match t with
     | TClass c ->
-      (match List.find_opt (fun def -> def.class_name = c) p.classes with
-       | None -> failwith "Method called on undefined class"
-       | Some cdef ->
-         let mdef = List.find_opt (fun mdef -> mdef.method_name = m) cdef.methods in
-         (match mdef with
-          | None -> failwith (Printf.sprintf "Method %s not defined for class %s" m c)
-          | Some mdef ->
-            if List.length mdef.params <> List.length args
-            then
-              failwith
-                (Printf.sprintf
-                   "Method %s of class %s was applied with the wrong number of arguments"
-                   m
-                   c)
-            else
-              List.iter2
-                (fun arg param ->
-                  check_subclass (type_expr arg tenv) (snd param) p.classes)
-                args
-                mdef.params;
-            mdef.return))
+      let mdef = find_method c m in
+      if List.length mdef.params <> List.length args
+      then
+        failwith
+          (Printf.sprintf
+             "Method %s of class %s was applied with the wrong number of arguments"
+             m
+             c)
+      else
+        List.iter2
+          (fun arg param -> check_subclass (type_expr arg tenv) (snd param) p.classes)
+          args
+          mdef.params;
+      mdef.return
     | _ -> error "method call on non-object"
   and check_constructor cls args tenv =
     let cdef = List.find (fun def -> def.class_name = cls) p.classes in
@@ -161,27 +165,55 @@ let typecheck_prog p =
       |> (function
        | Some t -> t
        | None -> failwith (Printf.sprintf "Variable %s not found" x))
-    | Field (e, x) ->
-      (match type_expr e tenv with
+    | Field (e, a) ->
+      let rec find_attr c a =
+            let cdef = List.find (fun def -> def.class_name = c) p.classes in
+            let comp attr = fst attr = a in
+            if List.exists comp cdef.attributes
+            then List.find comp cdef.attributes
+            else (
+              try find_attr (Option.get cdef.parent) a with
+              | Invalid_argument _ ->
+                failwith (Printf.sprintf "Field %s not defined for class %s" a c))
+      in
+      match type_expr e tenv with
        | TClass c ->
-         let cls = List.find (fun def -> def.class_name = c) p.classes in
-         cls.attributes |> List.find (fun attr -> fst attr = x) |> fun attr -> snd attr
-       | _ -> error "Cannot access field on non-class type")
+        let attr = find_attr c a in
+        snd attr
+       | _ -> error "Cannot access field on non-class type"
   in
   let rec check_instr i ret tenv =
     let check_seq = List.iter (fun i -> check_instr i ret tenv) in
     match i with
     | Print e -> check e TInt tenv
     | Set (m, e) ->
-      let t = type_mem_access m tenv in
-      check_subclass (type_expr e tenv) t p.classes
+      (try
+         let t = type_mem_access m tenv in
+         check_subclass (type_expr e tenv) t p.classes
+       with
+       | _ -> ())
     | If (e, seq1, seq2) ->
+      (try
+         check e TBool tenv;
+         check_seq seq1;
+         check_seq seq2
+       with
+       | _ -> ())
+    | While (e, seq) ->
       check e TBool tenv;
-      check_seq seq1;
-      check_seq seq2
-    | While (e, seq) -> check e TBool tenv; check_seq seq
-    | Return e -> check e ret tenv
+      check_seq seq
+    | Return e -> assert (Env.exists (fun elt _ -> elt = "this") tenv); check e ret tenv
     | Expr e -> check e TVoid tenv
-  and check_seq s ret tenv = List.iter (fun i -> check_instr i ret tenv) s in
-  check_seq p.main TVoid tenv
+  and check_seq s ret tenv = List.iter (fun i -> check_instr i ret tenv) s
+  and check_mdef mdef tenv =
+    assert (Env.exists (fun elt _ -> elt = "this") tenv);
+    check_seq mdef.code mdef.return (add_env mdef.locals tenv |> add_env mdef.params)
+  and check_class cdef tenv =
+    List.iter
+      (fun m ->
+        check_mdef m (Env.add "this" (TClass cdef.class_name) tenv))
+      cdef.methods
+  in
+  check_seq p.main TVoid tenv;
+  List.iter (fun c -> check_class c tenv) p.classes
 ;;

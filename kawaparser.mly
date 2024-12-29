@@ -20,8 +20,6 @@
 %token LPAR RPAR BEGIN END SEMI
 %token EOF
 
-%nonassoc RETURN
-
 %left OR
 %left AND
 %left EQ NEQ
@@ -32,9 +30,7 @@
 %nonassoc UNARY
 
 %left DOT
-%left FIELD
 
-%nonassoc LPAR
 
 
 %start program
@@ -104,15 +100,15 @@ MAIN BEGIN main=list(instruction) END EOF
 instruction:
   | PRINT LPAR e=expression RPAR SEMI { Print(e) }
   | m=mem ASSIGN e=expression SEMI { Set(m, e) }
-  | IF LPAR e=expression RPAR BEGIN ins_if=list(instruction) ELSE BEGIN ins_else=list(instruction) END { If (e, ins_if, ins_else) }
+  | IF LPAR e=expression RPAR BEGIN ins_if=list(instruction) END ELSE BEGIN ins_else=list(instruction) END { If (e, ins_if, ins_else) }
   | WHILE LPAR e=expression RPAR BEGIN inst=list(instruction) END { While (e, inst) }
-  | RETURN e=expression SEMI { Return (e) } %prec RETURN
+  | RETURN e=expression SEMI { Return (e) }
   | e=expression SEMI { Expr(e) }
 ;
 
 mem:
   | id=IDENT { Var(id) }
-  | expr=expression DOT id=IDENT { Field (expr, id) } %prec FIELD
+  | expr=expression DOT id=IDENT { Field (expr, id) }
 ;
 
 unop:
@@ -147,7 +143,7 @@ expression:
 | op=unop expr=expression { Unop (op, expr)} %prec UNARY
 | e1=expression op=binop e2=expression { Binop (op, e1, e2) }
 | LPAR e=expression RPAR { e }
-| NEW id=IDENT { New (id) } %prec UNARY
+| NEW id=IDENT { New (id) }
 | NEW id=IDENT LPAR args=separated_list(COMMA, expression) RPAR { NewCstr (id, args) }
 | e=expression DOT id=IDENT LPAR args=separated_list(COMMA, expression) RPAR { MethCall (e, id, args) }
 ;

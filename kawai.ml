@@ -15,7 +15,7 @@ let () =
   try
     let prog = Kawaparser.program Kawalexer.token lb in
     close_in c;
-    (* Typechecker.typecheck_prog prog; *)
+    Typechecker.typecheck_prog prog;
     Interpreter.exec_prog prog;
     exit 0
   with
@@ -31,5 +31,5 @@ let () =
      eprintf "interpreter error: %s@." s;
      exit 1
   | e ->
-     eprintf "Anomaly: %s\n@." (Printexc.to_string e);
+     eprintf "Anomaly: %s\n@." (Printexc.to_string e); Printexc.print_backtrace stdout;
      exit 2
