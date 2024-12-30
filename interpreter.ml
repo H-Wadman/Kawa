@@ -19,8 +19,8 @@ let exec_prog (p : program) : unit =
   List.iter (fun (x, _) -> Hashtbl.add env x Null) p.globals;
   let rec eval_call f this args =
     let lenv = Hashtbl.create 1 in
-    List.iter (fun local -> Hashtbl.add lenv (fst local) Null) f.locals;
     List.iter2 (fun param v -> Hashtbl.add lenv (fst param) v) f.params args;
+    List.iter (fun local -> Hashtbl.add lenv (fst local) Null) f.locals;
     Hashtbl.add lenv "this" (VObj this);
     try
       exec_seq f.code lenv;
@@ -102,7 +102,9 @@ let exec_prog (p : program) : unit =
     let rec exec (i : instr) : unit =
       match i with
       | Print e -> Printf.printf "Debug: %d\n%!" (evali e)
-      | Set (Var s, e) -> Hashtbl.replace env s (eval e)
+      | Set (Var s, e) -> (
+          if Hashtbl.mem lenv s then Hashtbl.replace lenv s (eval e) else Hashtbl.replace env s (eval e)
+        )
       | Set (Field (o, s), e) -> Hashtbl.replace (evalo o).fields s (eval e)
       | If (cond, br1, br2) -> if evalb cond then exec_seq br1 else exec_seq br2
       | While (cond, br) ->

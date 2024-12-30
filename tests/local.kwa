@@ -1,0 +1,56 @@
+var paire p;
+var paire pt;
+var triple t;
+var int k;
+
+class paire {
+  attribute int x;
+  attribute int y;
+
+  method void constructor(int x, int y) {
+    this.x = x;
+    this.y = y;
+  }
+
+  method int somme() {
+    return this.x + this.y;
+  }
+}
+
+class triple extends paire {
+  attribute int z;
+
+  method void constructor(int x, int y, int z) {
+    var int c;
+    
+    print(k);
+    c = 5;
+    this.x = c;
+    // Prints 5
+    print(c);
+    //Prints 5
+    print(this.x);
+    this.y = y;
+    print(this.y);
+    this.z = z;
+  }
+
+  method int produit() {
+    return this.x * this.y * this.z;
+  }
+}
+
+main {
+  k = 2;
+  p = new paire(1, 2);
+  //Prints 2 5 5 4 
+  t = new triple(3, 4, 5);
+  //Prints 3
+  print(p.somme());
+  //Prints 5 * 4 * 5 = 100
+  print(t.produit());
+  //Prints 2 5 5 2
+  pt = new triple(1, 2,3);
+  //Prints 7
+  print(pt.somme());
+}
