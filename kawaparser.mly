@@ -17,7 +17,7 @@
 
 %token DOT COMMA
 
-%token LPAR RPAR BEGIN END SEMI
+%token LPAR RPAR BEGIN END SEMI LSQB RSQB
 %token EOF
 
 %left OR
@@ -27,9 +27,9 @@
 %left PLUS MINUS
 %left STAR SLASH PERCENT
 
-%nonassoc UNARY
+%nonassoc UNARY NEWARR
 
-%left DOT
+%left DOT LSQB
 
 
 
@@ -88,6 +88,7 @@ typ:
   | TINT { TInt }
   | TBOOL { TBool }
   | id=IDENT { TClass(id) }
+  | t=typ LSQB n=INT RSQB { TArray(t, n) }
 ;
 
 program:
@@ -109,6 +110,7 @@ instruction:
 mem:
   | id=IDENT { Var(id) }
   | expr=expression DOT id=IDENT { Field (expr, id) }
+  | e=expression LSQB idx=expression RSQB { ArrAccess(e, idx) }
 ;
 
 unop:
@@ -143,7 +145,9 @@ expression:
 | op=unop expr=expression { Unop (op, expr)} %prec UNARY
 | e1=expression op=binop e2=expression { Binop (op, e1, e2) }
 | LPAR e=expression RPAR { e }
-| NEW id=IDENT { New (id) }
 | NEW id=IDENT LPAR args=separated_list(COMMA, expression) RPAR { NewCstr (id, args) }
+| LSQB elts=separated_list(COMMA, expression) RSQB { Arr (Array.of_list elts) }
+| NEW t=typ { match t with | TArray (t, n) -> NewArray (t, n) | TClass id -> New (id)
+  | _ -> failwith "Cannot only declare new of class or array" } %prec NEWARR
 | e=expression DOT id=IDENT LPAR args=separated_list(COMMA, expression) RPAR { MethCall (e, id, args) }
 ;

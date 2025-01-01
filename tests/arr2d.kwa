@@ -1,0 +1,9 @@
+var int[5][2] arr;
+
+main {
+    arr = new int[5][2];
+
+    arr[0] = new int[5];
+    arr[0][0] = 42;
+    print(arr[0][0]);
+}

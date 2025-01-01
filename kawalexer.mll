@@ -53,6 +53,8 @@ rule token = parse
   | ")"  { RPAR }
   | "{"  { BEGIN }
   | "}"  { END }
+  | "["  { LSQB }
+  | "]"  { RSQB }
 
   (*Binary op symbols*)
   | "+"  { PLUS }

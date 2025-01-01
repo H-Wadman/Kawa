@@ -4,6 +4,7 @@ type value =
   | VInt of int
   | VBool of bool
   | VObj of obj
+  | VArray of value array
   | Null
 
 and obj =
@@ -40,6 +41,10 @@ let exec_prog (p : program) : unit =
       match eval e with
       | VObj o -> o
       | _ -> assert false
+    and evala e =
+      match eval e with 
+      | VArray a -> a
+      | _ -> assert false
     and eval_args args = List.map (fun e -> eval e) args
     and eval (e : expr) : value =
       match e with
@@ -48,11 +53,14 @@ let exec_prog (p : program) : unit =
       | Unop (Opp, expr) -> VInt (-evali expr)
       | Unop (Not, expr) -> VBool (not (evalb expr))
       | Binop (bin, e1, e2) -> eval_binop bin e1 e2
+      | NewArray (_, n) -> VArray (Array.make n Null)
+      | Arr a -> VArray (Array.map eval a)
       | Get (Var s) ->
         (match Hashtbl.find_opt lenv s with
          | Some v -> v
          | None -> Hashtbl.find env s)
       | Get (Field (o, attr)) -> Hashtbl.find (evalo o).fields attr
+      | Get (ArrAccess (e, ix)) -> let a = evala e in a.(evali ix)
       | This -> Hashtbl.find lenv "this"
       | New cls ->
         let fields = Hashtbl.create 1 in
@@ -106,6 +114,7 @@ let exec_prog (p : program) : unit =
           if Hashtbl.mem lenv s then Hashtbl.replace lenv s (eval e) else Hashtbl.replace env s (eval e)
         )
       | Set (Field (o, s), e) -> Hashtbl.replace (evalo o).fields s (eval e)
+      | Set (ArrAccess (a, ix), e) -> (evala a).(evali ix) <- eval e
       | If (cond, br1, br2) -> if evalb cond then exec_seq br1 else exec_seq br2
       | While (cond, br) ->
         if evalb cond

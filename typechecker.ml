@@ -60,6 +60,12 @@ let typecheck_prog p =
       else failwith (Printf.sprintf "New called with class %s which does not exist" cls)
     | NewCstr (cls, args) -> check_constructor cls args tenv
     | MethCall (e, m, args) -> check_meth_call e m args tenv
+    | NewArray (t, n) -> TArray (t, n)
+    | Arr (arr) -> if Array.length arr = 0 then failwith "Cannot assign empty array" else  TArray (type_expr arr.(0) tenv, Array.length arr)
+  and type_array_access e tenv =
+    match type_expr e tenv with 
+    | TArray (t, _) -> t
+    | _ -> failwith "Cannot subscript non-array"
   and check_binop op e1 e2 tenv =
     match op with
     | Add ->
@@ -160,6 +166,7 @@ let typecheck_prog p =
       if cstr.return = TVoid then TClass cls else failwith "Constructor must return void"
   and type_mem_access m tenv =
     match m with
+    | ArrAccess (e, e2) -> check e2 TInt tenv; type_array_access e tenv
     | Var x ->
       Env.find_opt x tenv
       |> (function

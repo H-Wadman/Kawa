@@ -7,12 +7,14 @@ type typ =
   | TInt
   | TBool
   | TClass of string
+  | TArray of typ * int
 
-let typ_to_string = function
+let rec typ_to_string = function
   | TVoid -> "void"
   | TInt -> "int"
   | TBool -> "bool"
   | TClass c -> c
+  | TArray (t, i) -> (Printf.sprintf "%s[%d]" (typ_to_string t) i)
 ;;
 
 type unop =
@@ -50,11 +52,17 @@ type expr =
   | NewCstr of string * expr list
   (* Appel de méthode *)
   | MethCall of expr * string * expr list
+  (* Creation d'un tableau d'une taille spécifique *)
+  | NewArray of typ * int
+  (* Creation d'un tableau avec des éléments spécifique*)
+  | Arr of expr array
+
 
 (* Accès mémoire : variable ou attribut d'un objet *)
 and mem_access =
   | Var of string
   | Field of expr (* objet *) * string (* nom d'un attribut *)
+  | ArrAccess of expr * expr
 
 (* Instructions *)
 type instr =

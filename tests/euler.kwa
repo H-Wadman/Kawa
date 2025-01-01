@@ -1,0 +1,187 @@
+var vec primes;
+var prime p;
+var int i;
+var solution sol;
+var int temp;
+var int lim;
+var bool _;
+
+
+class vec {
+    attribute int size;
+    attribute int[1000000] arr;
+
+    method void constructor() {
+        this.size = 0;
+        this.arr = new int[1000000];
+    }
+
+    method void push(int elt) {
+        this.arr[this.size] = elt;
+        this.size = this.size + 1;
+    }
+
+    method int pop() {
+        this.size = this.size - 1;
+        return this.arr[this.size];
+    }
+
+    method int at(int i) {
+        return this.arr[i];
+    }
+
+    method bool has(int elt) {
+        var int i;
+        i = 0;
+
+        while (i < this.size) {
+            if (elt == this.arr[i]) {
+                return true;
+            } else{}
+
+            i = i + 1;            
+        }
+
+        return false;
+    }
+
+    method bool bin(int elt) {
+        var int hi;
+        var int lo;
+        var int temp;
+
+        lo = 0;
+        hi = this.size;
+
+        while (lo < hi) {
+            temp = (hi + lo)/2;
+            if (this.at(temp) == elt) {
+                return true;
+            }
+            else {
+                if (elt < this.at(temp)) {
+                    hi = temp;
+                }
+                else {
+                    lo = temp + 1;
+                }
+            }
+        }
+
+        return false;
+    }
+}
+
+class pair {
+    attribute int x;
+    attribute int y;
+
+    method void constructor(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+class prime {
+    //square root rounded up
+    method int sqrt(int n) {
+        var int i;
+        i = 1;
+        while (i * i < n) {
+            i = i + 1;
+        }
+
+        return i;
+    } 
+
+    method bool is_prime(int n) {
+        var int i;
+        var int sqrt;
+        i = 2;
+
+        sqrt = this.sqrt(n);
+        while (i <= sqrt) {
+            if (n % i == 0) { return false; }
+            else {}
+
+            i = i + 1;
+        }
+
+        return true;
+    }
+}
+
+class solution {
+    
+    method pair consecutive(vec p, int i, int lim) {
+        var int j;
+        var int sum;
+        var pair res;
+
+        res = new pair(0, 0);
+        sum = 0;
+        j = 0;
+        while (i + j < p.size && sum + p.at(i + j) < lim) {
+            sum = sum + p.at(i + j);
+            //print(sum);
+            //print(p.at(i + j));
+
+            if (p.bin(sum)) {
+                res.x = j + 1;
+                res.y = sum;
+            } else {}
+
+            j = j + 1;
+        }
+
+        return res;
+    }
+    method int solve(vec p, int lim) {
+        var int max;
+        var int res;
+        var pair curr;
+        var int i;
+
+        max = 0;
+        res = 0;
+        i = 0;
+        while (i < primes.size) {
+            print(i);
+            curr = this.consecutive(p, i, lim);
+            if (curr.x > max) {
+                max = curr.x;
+                res = curr.y;
+            } else {}
+            
+            i = i + 1;
+        }
+
+        return res;
+    }
+}
+
+//Ridiculously inefficient solution to https://projecteuler.net/problem=50
+// trying to test the language in more than a toy example.
+main {
+    p = new prime;
+
+    primes = new vec();
+    primes.push(2);
+
+    lim = 1000000;
+    i = 3;
+    while (i <= lim) {
+        if (p.is_prime(i)) {
+            print(i);
+            primes.push(i);
+            //print(i);
+        } else {}
+
+        i = i + 2;
+    }
+    
+    sol = new solution;
+    //temp = sol.consecutive(primes, 0, lim).y;
+    temp = sol.solve(primes, lim);
+    print(temp);
+}
