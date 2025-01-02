@@ -10,3 +10,4 @@ dans typechecker.ml, car je trouvais cela difficile de lire. Je ne suis pas sûr
 J'ai gardé la fonction "check" qui est la seule utilisé dans la suite de la 
 fonction "typecheck_prog"
 - Ne te laisse pas ignorer une valeur de retour.
+- Suggère des variables de nom similaire si variable inexistante est utilisée

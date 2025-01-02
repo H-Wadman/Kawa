@@ -16,6 +16,19 @@ module Env = Map.Make (String)
 
 type tenv = typ Env.t
 
+let lev s1 s2 =
+  let a, b = String.to_seq s1 |> List.of_seq, String.to_seq s2 |> List.of_seq in
+  let rec aux a b =
+  match a, b with 
+  | [], _ -> List.length b
+  | _, [] -> List.length a
+  | x :: xs, y :: ys -> if x = y then aux xs ys else 1 + min (min (aux xs b) (aux a ys)) (aux xs ys)
+  in
+  aux a b
+;;
+
+assert (lev "kitten" "sitting" = 3);;
+
 let add_env l tenv = List.fold_left (fun env (x, t) -> Env.add x t env) tenv l
 
 let check_subclass t base class_list =
@@ -171,7 +184,13 @@ let typecheck_prog p =
       Env.find_opt x tenv
       |> (function
        | Some t -> t
-       | None -> failwith (Printf.sprintf "Variable %s not found" x))
+       | None -> 
+          if Env.is_empty tenv then failwith (Printf.sprintf "Variable %s not found" x)
+          else 
+            let min v _ acc = let l = lev v x in if l <= fst acc then (l, v) else acc in
+            let sugg = Env.fold min tenv (Int.max_int, "") |> snd in
+            failwith (Printf.sprintf "Variable %s not found, did you mean %s?" x sugg)
+          )
     | Field (e, a) ->
       let rec find_attr c a =
             let cdef = List.find (fun def -> def.class_name = c) p.classes in
@@ -194,11 +213,8 @@ let typecheck_prog p =
     match i with
     | Print e -> check e TInt tenv
     | Set (m, e) ->
-      (try
          let t = type_mem_access m tenv in
          check_subclass (type_expr e tenv) t p.classes
-       with
-       | _ -> ())
     | If (e, seq1, seq2) ->
       (try
          check e TBool tenv;
