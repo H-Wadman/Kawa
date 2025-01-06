@@ -42,10 +42,10 @@ let check_subclass t base class_list =
       | Some p -> aux (get_class p) base)
   in
   match t, base with
-  | TInt, _ | TBool, _ | TVoid, _ ->
+  | TInt, _ | TBool, _ | TVoid, _ | TArray (_, _), _ ->
     if t <> base then failwith "Basic types cannot be subclasses"
   | TClass c, TClass c2 -> aux (get_class c) c2
-  | _, _ -> failwith "Class cannot inherit from basic types"
+  | _, _ -> failwith "Class cannot inherit from non-class types"
 ;;
 
 let typecheck_prog p =

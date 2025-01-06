@@ -168,7 +168,7 @@ main {
     primes = new vec();
     primes.push(2);
 
-    lim = 100;
+    lim = 1000000;
     i = 3;
     while (i <= lim) {
         if (p.is_prime(i)) {
@@ -182,7 +182,6 @@ main {
     
     sol = new solution;
     //temp = sol.consecutive(primes, 0, lim).y;
-    sop = 1;
-    temp = sop.solve(primes, lim);
+    temp = sol.solve(primes, lim);
     print(temp);
 }
