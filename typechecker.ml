@@ -229,7 +229,6 @@ let typecheck_prog p =
     | Expr e -> check e TVoid tenv
   and check_seq s ret tenv = List.iter (fun i -> check_instr i ret tenv) s
   and check_mdef mdef tenv =
-    assert (Env.exists (fun elt _ -> elt = "this") tenv);
     check_seq mdef.code mdef.return (add_env mdef.locals tenv |> add_env mdef.params)
   and check_class cdef tenv =
     List.iter
