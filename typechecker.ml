@@ -50,14 +50,13 @@ let tag_methods cls_def =
 
 let get_method_signature m args =
   let rec fmt_params args res =
-    match args with
+    match args with 
     | [] -> res
     | hd :: tl -> res ^ ", " ^ typ_to_string hd |> fmt_params tl
   in
-  let params =
-    match args with
-    | [] -> "()"
-    | hd :: tl -> fmt_params tl (typ_to_string hd)
+  let params = match args with 
+  | [] -> "()"
+  | hd :: tl -> fmt_params tl (typ_to_string hd)
   in
   Printf.sprintf "%s(%s)" m params
 ;;
@@ -194,12 +193,9 @@ let typecheck_prog p =
     | [ hd ] -> hd
     | hd :: hd' :: _ ->
       if score hd = score hd' then failwith "Ambiguous method call" else hd
-    | [] ->
-      failwith
-        (Printf.sprintf
-           "No matching function definition %s found for %s"
-           (get_method_signature m (List.map (fun a -> type_expr a tenv) args))
-           cls)
+    | [] -> (match c_def.parent with 
+    | None -> failwith (Printf.sprintf "No matching function definition %s found for %s" (get_method_signature m (List.map (fun a -> type_expr a tenv) args)) cls)
+    | Some p -> find_overload p m args tenv)
   and check_meth_call e m args tag tenv =
     (*let rec find_method c m =
       let cdef = List.find (fun def -> def.class_name = c) p.classes in
