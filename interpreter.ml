@@ -17,7 +17,6 @@ exception Return of value
 
 let exec_prog (p : program) : unit =
   let env = Hashtbl.create 16 in
-  List.iter (fun (x, _) -> Hashtbl.add env x Null) p.globals;
   let rec eval_call f this args =
     let lenv = Hashtbl.create 1 in
     List.iter2 (fun param v -> Hashtbl.add lenv (fst param) v) f.params args;
@@ -140,5 +139,8 @@ let exec_prog (p : program) : unit =
     and exec_seq s = List.iter exec s in
     exec_seq s
   in
+  let inits = List.filter (fun (_, _, eop) -> Option.is_some eop) p.globals in
+  let init_seq = List.map (fun (s, _, eop) -> Set (Var s, Option.get eop)) inits in
+  exec_seq init_seq (Hashtbl.create 0);
   exec_seq p.main (Hashtbl.create 1)
 ;;
