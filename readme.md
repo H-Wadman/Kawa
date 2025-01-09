@@ -11,6 +11,9 @@ J'ai gardé la fonction "check" qui est la seule utilisé dans la suite de la
 fonction "typecheck_prog"
 - Ne te laisse pas ignorer une valeur de retour.
 - Suggère des variables de nom similaire si variable inexistante est utilisée
+- Tableaux implementés
+- Surcharge statique implementé (et message d'erreur donnant les listes d'arguments si methode pas trouvé)
 
 ## Todo
 - Disallow multiple declarations for same method (instead of taking the first)
+- Remove all asserts 

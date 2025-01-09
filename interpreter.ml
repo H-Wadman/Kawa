@@ -42,7 +42,7 @@ let exec_prog (p : program) : unit =
       | VObj o -> o
       | _ -> assert false
     and evala e =
-      match eval e with 
+      match eval e with
       | VArray a -> a
       | _ -> assert false
     and eval_args args = List.map (fun e -> eval e) args
@@ -60,24 +60,37 @@ let exec_prog (p : program) : unit =
          | Some v -> v
          | None -> Hashtbl.find env s)
       | Get (Field (o, attr)) -> Hashtbl.find (evalo o).fields attr
-      | Get (ArrAccess (e, ix)) -> let a = evala e in a.(evali ix)
+      | Get (ArrAccess (e, ix)) ->
+        let a = evala e in
+        a.(evali ix)
       | This -> Hashtbl.find lenv "this"
       | New cls ->
         let fields = Hashtbl.create 1 in
         let c_def = List.find (fun c -> c.class_name = cls) p.classes in
         List.iter (fun a -> Hashtbl.add fields (fst a) Null) c_def.attributes;
         VObj { cls; fields }
-      | NewCstr (cls, args) ->
+      | NewCstr (cls, args, tag) ->
         let c_def = List.find (fun c -> c.class_name = cls) p.classes in
         let obj = evalo (New cls) in
-        let cstr = List.find (fun m -> m.method_name = "constructor") c_def.methods in
+        assert (Option.is_some !tag);
+        let cstr =
+          List.find
+            (fun m ->
+              assert (Option.is_some m.tag);
+              m.method_name = "constructor" && m.tag = !tag)
+            c_def.methods
+        in
         eval_call cstr obj (eval_args args) |> ignore;
         VObj obj
-      | MethCall (e, name, args) ->
+      | MethCall (e, name, args, tag) ->
+        assert (Option.is_some !tag);
         let o = evalo e in
         let rec find_method c m =
           let c_def = List.find (fun c_def -> c_def.class_name = c) p.classes in
-          let comp meth = meth.method_name = m in
+          let comp meth =
+            assert (Option.is_some meth.tag);
+            meth.method_name = m && meth.tag = !tag
+          in
           if List.exists comp c_def.methods
           then List.find comp c_def.methods
           else (
@@ -110,9 +123,10 @@ let exec_prog (p : program) : unit =
     let rec exec (i : instr) : unit =
       match i with
       | Print e -> Printf.printf "Debug: %d\n%!" (evali e)
-      | Set (Var s, e) -> (
-          if Hashtbl.mem lenv s then Hashtbl.replace lenv s (eval e) else Hashtbl.replace env s (eval e)
-        )
+      | Set (Var s, e) ->
+        if Hashtbl.mem lenv s
+        then Hashtbl.replace lenv s (eval e)
+        else Hashtbl.replace env s (eval e)
       | Set (Field (o, s), e) -> Hashtbl.replace (evalo o).fields s (eval e)
       | Set (ArrAccess (a, ix), e) -> (evala a).(evali ix) <- eval e
       | If (cond, br1, br2) -> if evalb cond then exec_seq br1 else exec_seq br2

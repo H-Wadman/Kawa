@@ -49,9 +49,9 @@ type expr =
   | This
   (* Création d'un nouvel objet *)
   | New of string
-  | NewCstr of string * expr list
+  | NewCstr of string * expr list * int option ref
   (* Appel de méthode *)
-  | MethCall of expr * string * expr list
+  | MethCall of expr * string * expr list * int option ref
   (* Creation d'un tableau d'une taille spécifique *)
   | NewArray of typ * int
   (* Creation d'un tableau avec des éléments spécifique*)
@@ -91,6 +91,7 @@ type method_def =
   ; params : (string * typ) list
   ; locals : (string * typ) list
   ; return : typ
+  ; mutable tag : int option
   }
 
 (* Déclaration de var *)

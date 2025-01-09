@@ -72,7 +72,7 @@ method_def:
     let (t, id) = d in
     let permute tup_lst =
       List.map (fun (one, two) -> (two, one)) tup_lst in
-      {method_name=id; code; params=(permute args); locals=local; return=t}
+      {method_name=id; code; params=(permute args); locals=local; return=t; tag=None}
   }
 ;
 
@@ -145,9 +145,9 @@ expression:
 | op=unop expr=expression { Unop (op, expr)} %prec UNARY
 | e1=expression op=binop e2=expression { Binop (op, e1, e2) }
 | LPAR e=expression RPAR { e }
-| NEW id=IDENT LPAR args=separated_list(COMMA, expression) RPAR { NewCstr (id, args) }
+| NEW id=IDENT LPAR args=separated_list(COMMA, expression) RPAR { NewCstr (id, args, ref None) }
 | LSQB elts=separated_list(COMMA, expression) RSQB { Arr (Array.of_list elts) }
 | NEW t=typ { match t with | TArray (t, n) -> NewArray (t, n) | TClass id -> New (id)
   | _ -> failwith "Cannot only declare new of class or array" } %prec NEWARR
-| e=expression DOT id=IDENT LPAR args=separated_list(COMMA, expression) RPAR { MethCall (e, id, args) }
+| e=expression DOT id=IDENT LPAR args=separated_list(COMMA, expression) RPAR { MethCall (e, id, args, ref None) }
 ;
