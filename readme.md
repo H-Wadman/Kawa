@@ -3,6 +3,9 @@
 ## Difficultés rencontrées
 - Colonne par colonne ne permettait pas de vérifier au fur et à mesure. Hereusement cela n'a pas posé trop de problème
 - La gestion des variables locales/globales ainsi que les variables/methodes obtenu par héritage était d'abord un peu oublié. Ce n'était pas trop difficile de rajouter plus tard, par contre l'organisation du code n'est pas la plus jolie.
+- Pour les initialisations en declaration il fallait utiliser les
+fonctions d'evaluation en dehors d'exec_seq, mais c'était difficile et pas joli d'extraire ces fonctions.
+Ainsi la fonction init_vars pas trop efficace donne pourtant une solution plutôt élégante. 
 
 ## Choix
 - À la fin, j'ai décidé d'extraire l'implementation de pas mal des fonctions 
