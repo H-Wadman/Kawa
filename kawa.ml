@@ -89,13 +89,13 @@ type method_def =
   { method_name : string
   ; code : seq
   ; params : (string * typ) list
-  ; locals : (string * typ) list
+  ; locals : (string * typ * expr option) list
   ; return : typ
   ; mutable tag : int option
   }
 
 (* Déclaration de var *)
-type var_decl = string * typ
+type var_decl = string * typ * expr option
 
 (* Déclaration d'attribut *)
 type attr_decl = string * typ
@@ -119,6 +119,6 @@ type class_def =
    d'instructions *)
 type program =
   { classes : class_def list
-  ; globals : (string * typ) list
+  ; globals : (string * typ * expr option) list
   ; main : seq
   }

@@ -51,7 +51,14 @@ variable_decl:
     let (t, id) = d in
     match t with
   | TVoid -> failwith "Cannot declare a variable of type void";
-  | _ -> (id, t)
+  | _ -> (id, t, None)
+  }
+| VAR d=decl ASSIGN e=expression SEMI
+  {
+    let (t, id) = d in
+    match t with
+  | TVoid -> failwith "Cannot declare a variable of type void";
+  | _ -> (id, t, Some e)
   }
 ;
 
