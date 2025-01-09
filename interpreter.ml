@@ -17,16 +17,22 @@ exception Return of value
 
 let exec_prog (p : program) : unit =
   let env = Hashtbl.create 16 in
+  List.iter (fun (x, _, _) -> Hashtbl.add env x Null) p.globals;
   let rec eval_call f this args =
     let lenv = Hashtbl.create 1 in
     List.iter2 (fun param v -> Hashtbl.add lenv (fst param) v) f.params args;
-    List.iter (fun local -> Hashtbl.add lenv (fst local) Null) f.locals;
+    List.iter (fun (s, _, _) -> Hashtbl.add lenv s Null) f.locals;
     Hashtbl.add lenv "this" (VObj this);
+    init_vars f.locals lenv;
     try
       exec_seq f.code lenv;
       Null
     with
     | Return v -> v
+  and init_vars vars lenv =
+    let inits = List.filter (fun (_, _, eop) -> Option.is_some eop) vars in
+    let init_seq = List.map (fun (s, _, eop) -> Set (Var s, Option.get eop)) inits in
+    exec_seq init_seq lenv;
   and exec_seq s lenv =
     let rec evali e =
       match eval e with
@@ -139,8 +145,6 @@ let exec_prog (p : program) : unit =
     and exec_seq s = List.iter exec s in
     exec_seq s
   in
-  let inits = List.filter (fun (_, _, eop) -> Option.is_some eop) p.globals in
-  let init_seq = List.map (fun (s, _, eop) -> Set (Var s, Option.get eop)) inits in
-  exec_seq init_seq (Hashtbl.create 0);
+init_vars p.globals env;
   exec_seq p.main (Hashtbl.create 1)
 ;;

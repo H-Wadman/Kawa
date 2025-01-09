@@ -64,6 +64,11 @@ and mem_access =
   | Field of expr (* objet *) * string (* nom d'un attribut *)
   | ArrAccess of expr * expr
 
+(* Déclaration de var *)
+type var_decl = string * typ * expr option
+
+(* Déclaration d'attribut *)
+type attr_decl = string * typ
 (* Instructions *)
 type instr =
   (* Affichage d'un entier *)
@@ -89,16 +94,11 @@ type method_def =
   { method_name : string
   ; code : seq
   ; params : (string * typ) list
-  ; locals : (string * typ * expr option) list
+  ; locals : var_decl list
   ; return : typ
   ; mutable tag : int option
   }
 
-(* Déclaration de var *)
-type var_decl = string * typ * expr option
-
-(* Déclaration d'attribut *)
-type attr_decl = string * typ
 
 (* Définition de classe
 
@@ -119,6 +119,6 @@ type class_def =
    d'instructions *)
 type program =
   { classes : class_def list
-  ; globals : (string * typ * expr option) list
+  ; globals : var_decl list
   ; main : seq
   }

@@ -34,4 +34,4 @@ for f in fails:
         print(f"{f} was supposed to fail but succeeded")
     else:
         n_fail += 1
-print(f"{n_fail}/{len(fails)} succeeded properly")
+print(f"{n_fail}/{len(fails)} failed properly")

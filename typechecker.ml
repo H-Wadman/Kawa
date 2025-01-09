@@ -30,7 +30,7 @@ let lev s1 s2 =
 
 assert (lev "kitten" "sitting" = 3)
 
-let add_env l tenv = List.fold_left (fun env (x, t) -> Env.add x t env) tenv l
+let add_env l tenv = List.fold_left (fun env (x, t, _) -> Env.add x t env) tenv l
 
 (*let ht = Hashtbl.create 1 in*)
 (* class_def * method_name -> int*)
@@ -291,7 +291,7 @@ let typecheck_prog p =
     | Expr e -> check e TVoid tenv
   and check_seq s ret tenv = List.iter (fun i -> check_instr i ret tenv) s
   and check_mdef mdef tenv =
-    check_seq mdef.code mdef.return (add_env mdef.locals tenv |> add_env mdef.params)
+    check_seq mdef.code mdef.return (add_env mdef.locals tenv |> add_env (List.map (fun (a, b) -> a, b, None) mdef.params))
   and check_class cdef tenv =
     List.iter
       (fun m -> check_mdef m (Env.add "this" (TClass cdef.class_name) tenv))

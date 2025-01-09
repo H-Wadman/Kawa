@@ -1,0 +1,16 @@
+var int x = 1;
+var int y = 6;
+var test t = new test;
+
+class test {
+  method int foo(int x) {
+    var int z = 2;
+    return x + 2;
+  }
+}
+
+main {
+  x = t.foo(x);
+  y = y*(x+4);
+  print(y);
+}

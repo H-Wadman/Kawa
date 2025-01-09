@@ -13,6 +13,7 @@ fonction "typecheck_prog"
 - Suggère des variables de nom similaire si variable inexistante est utilisée
 - Tableaux implementés
 - Surcharge statique implementé (et message d'erreur donnant les listes d'arguments si methode pas trouvé)
+- Declarations initiales implementé
 
 ## Todo
 - Disallow multiple declarations for same method (instead of taking the first)
