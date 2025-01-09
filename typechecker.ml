@@ -118,72 +118,73 @@ let typecheck_prog p =
     match type_expr e tenv with
     | TArray (t, _) -> t
     | _ -> failwith "Cannot subscript non-array"
-  and check_binop op e1 e2 tenv =
+  and check_binop op_loc e1 e2 tenv =
+    let op, l = op_loc in
     match op with
-    | Add l ->
+    | Add ->
       (try 
       check e1 TInt tenv;
       check e2 TInt tenv;
       TInt
     with _ -> type_error_loc l "addition performed on non-int type")
-    | Sub l ->
+    | Sub ->
       (try 
       check e1 TInt tenv;
       check e2 TInt tenv;
       TInt
     with _ -> type_error_loc l "subtraction performed on non-int type")
-    | Mul l ->
+    | Mul ->
       (try 
       check e1 TInt tenv;
       check e2 TInt tenv;
       TInt
     with _ -> type_error_loc l "multiplication performed on non-int type")
-    | Div l ->
+    | Div ->
       (try 
       check e1 TInt tenv;
       check e2 TInt tenv;
       TInt
     with _ -> type_error_loc l "division performed on non-int type")
-    | Rem l ->
+    | Rem ->
       (try 
       check e1 TInt tenv;
       check e2 TInt tenv;
       TInt
     with _ -> type_error_loc l "modulo performed on non-int type")
-    | Lt l ->
+    | Lt ->
       (try 
       check e1 TInt tenv;
       check e2 TInt tenv;
       TInt
     with _ -> type_error_loc l "less than used on non-int type")
-    | Le l ->
+    | Le ->
       (try 
       check e1 TInt tenv;
       check e2 TInt tenv;
       TInt
     with _ -> type_error_loc l "less than or equal used on non-int type")
-    | Gt l ->
+    | Gt ->
       (try 
       check e1 TInt tenv;
       check e2 TInt tenv;
       TInt
     with _ -> type_error_loc l "greater than used on non-int type")
-    | Ge l ->
+    | Ge ->
       (try 
       check e1 TInt tenv;
       check e2 TInt tenv;
       TInt
     with _ -> type_error_loc l "greater than or equal used on non-int type")
-    | Eq l | Neq l ->
+    | Eq | Neq ->
       let t1, t2 = type_expr e1 tenv, type_expr e2 tenv in
       if t1 = t2 && t1 <> TVoid then TBool else type_error_loc l "(non-)equality tested on differing types"
-    | And l ->
+    | And ->
       (try 
       check e1 TInt tenv;
       check e2 TInt tenv;
       TInt
     with _ -> type_error_loc l "logical and used on non-bool type")
-    | Or l ->
+    | Or ->
       (try 
       check e1 TInt tenv;
       check e2 TInt tenv;

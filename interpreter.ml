@@ -105,25 +105,26 @@ let exec_prog (p : program) : unit =
         in
         let meth = find_method o.cls name in
         eval_call meth o (eval_args args)
-    and eval_binop bin e1 e2 =
+    and eval_binop bin_loc e1 e2 =
+      let bin, _ = bin_loc in
       match bin with
-      | Add _ -> VInt (evali e1 + evali e2)
-      | Sub _ -> VInt (evali e1 - evali e2)
-      | Mul _ -> VInt (evali e1 * evali e2)
-      | Div _ -> VInt (evali e1 / evali e2)
-      | Rem _ -> VInt (evali e1 mod evali e2)
-      | Lt _ -> VBool (evali e1 < evali e2)
-      | Le _ -> VBool (evali e1 <= evali e2)
-      | Gt _ -> VBool (evali e1 > evali e2)
-      | Ge _ -> VBool (evali e1 >= evali e2)
-      | Eq _ ->
+      | Add -> VInt (evali e1 + evali e2)
+      | Sub -> VInt (evali e1 - evali e2)
+      | Mul -> VInt (evali e1 * evali e2)
+      | Div -> VInt (evali e1 / evali e2)
+      | Rem -> VInt (evali e1 mod evali e2)
+      | Lt -> VBool (evali e1 < evali e2)
+      | Le -> VBool (evali e1 <= evali e2)
+      | Gt -> VBool (evali e1 > evali e2)
+      | Ge -> VBool (evali e1 >= evali e2)
+      | Eq ->
         let v1 = eval e1 in
         (match v1 with
          | VObj o -> VBool (v1 == eval e2)
          | _ -> VBool (v1 = eval e2))
-      | Neq _ -> VBool (eval e1 <> eval e2)
-      | And _ -> VBool (evalb e1 && evalb e2)
-      | Or _ -> VBool (evalb e1 || evalb e2)
+      | Neq -> VBool (eval e1 <> eval e2)
+      | And -> VBool (evalb e1 && evalb e2)
+      | Or -> VBool (evalb e1 || evalb e2)
     in
     let rec exec (i : instr) : unit =
       match i with

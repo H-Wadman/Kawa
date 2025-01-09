@@ -30,19 +30,22 @@ type unop =
   | Not
 
 type binop =
-  | Add of loc
-  | Sub of loc
-  | Mul of loc
-  | Div of loc
-  | Rem of loc
-  | Lt of loc
-  | Le of loc
-  | Gt of loc
-  | Ge of loc
-  | Eq of loc
-  | Neq of loc
-  | And of loc
-  | Or of loc
+  | Add
+  | Sub
+  | Mul
+  | Div
+  | Rem
+  | Lt
+  | Le
+  | Gt
+  | Ge
+  | Eq
+  | Neq
+  | And
+  | Or
+
+type binop_loc =
+  binop * loc
 
 (* Expressions *)
 type expr =
@@ -50,7 +53,7 @@ type expr =
   | Int of int
   | Bool of bool
   | Unop of unop * expr
-  | Binop of binop * expr * expr
+  | Binop of binop_loc * expr * expr
   (* Accès à une variable ou un attribut *)
   | Get of mem_access
   (* Objet courant *)

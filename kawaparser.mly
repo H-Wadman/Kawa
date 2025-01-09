@@ -128,19 +128,19 @@ unop:
 ;
 
 %inline binop:
-  | l=PLUS { Add l }
-  | l=MINUS { Sub l }
-  | l=STAR { Mul l }
-  | l=SLASH { Div l }
-  | l=PERCENT { Rem l }
-  | l=EQ { Eq l }
-  | l=NEQ { Neq l }
-  | l=LT { Lt l }
-  | l=GT { Gt l }
-  | l=LE { Le l }
-  | l=GE { Ge l }
-  | l=AND { And l }
-  | l=OR { Or l }
+  | l=PLUS { Add, l }
+  | l=MINUS { Sub, l }
+  | l=STAR { Mul, l }
+  | l=SLASH { Div, l }
+  | l=PERCENT { Rem, l }
+  | l=EQ { Eq, l }
+  | l=NEQ { Neq, l }
+  | l=LT { Lt, l }
+  | l=GT { Gt, l }
+  | l=LE { Le, l }
+  | l=GE { Ge, l }
+  | l=AND { And, l }
+  | l=OR { Or, l }
 ;
 
 
