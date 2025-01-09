@@ -50,22 +50,24 @@ let tag_methods cls_def =
 
 let get_method_signature m args =
   let rec fmt_params args res =
-    match args with 
+    match args with
     | [] -> res
     | hd :: tl -> res ^ ", " ^ typ_to_string hd |> fmt_params tl
   in
-  let params = match args with 
-  | [] -> "()"
-  | hd :: tl -> fmt_params tl (typ_to_string hd)
+  let params =
+    match args with
+    | [] -> "()"
+    | hd :: tl -> fmt_params tl (typ_to_string hd)
   in
   Printf.sprintf "%s(%s)" m params
 ;;
 
-let type_error_loc (loc: loc) msg =
+let type_error_loc (loc : loc) msg =
   let line = loc.start_p.pos_lnum in
   let start = loc.start_p.pos_cnum - loc.start_p.pos_bol + 1 in
   let end_p = loc.end_p.pos_cnum - loc.end_p.pos_bol in
-  failwith (Printf.sprintf "Type error on line %d, characters %d-%d: %s" line start end_p msg)
+  failwith
+    (Printf.sprintf "Type error on line %d, characters %d-%d: %s" line start end_p msg)
 ;;
 
 let check_subclass t base class_list =
@@ -94,12 +96,18 @@ let typecheck_prog p =
     match e with
     | Int _ -> TInt
     | Bool _ -> TBool
-    | Unop (Opp, e) ->
-      check e TInt tenv;
-      TInt
-    | Unop (Not, e) ->
-      check e TBool tenv;
-      TBool
+    | Unop ((Opp, l), e) ->
+      (try
+         check e TInt tenv;
+         TInt
+       with
+       | _ -> type_error_loc l "negative taken of non-int type")
+    | Unop ((Not, l), e) ->
+      (try
+         check e TBool tenv;
+         TBool
+       with
+       | _ -> type_error_loc l "logical negation of non-bool type")
     | Binop (op, e1, e2) -> check_binop op e1 e2 tenv
     | Get m -> type_mem_access m tenv
     | This -> Env.find "this" tenv
@@ -122,74 +130,87 @@ let typecheck_prog p =
     let op, l = op_loc in
     match op with
     | Add ->
-      (try 
-      check e1 TInt tenv;
-      check e2 TInt tenv;
-      TInt
-    with _ -> type_error_loc l "addition performed on non-int type")
+      (try
+         check e1 TInt tenv;
+         check e2 TInt tenv;
+         TInt
+       with
+       | _ -> type_error_loc l "addition performed on non-int type")
     | Sub ->
-      (try 
-      check e1 TInt tenv;
-      check e2 TInt tenv;
-      TInt
-    with _ -> type_error_loc l "subtraction performed on non-int type")
+      (try
+         check e1 TInt tenv;
+         check e2 TInt tenv;
+         TInt
+       with
+       | _ -> type_error_loc l "subtraction performed on non-int type")
     | Mul ->
-      (try 
-      check e1 TInt tenv;
-      check e2 TInt tenv;
-      TInt
-    with _ -> type_error_loc l "multiplication performed on non-int type")
+      (try
+         check e1 TInt tenv;
+         check e2 TInt tenv;
+         TInt
+       with
+       | _ -> type_error_loc l "multiplication performed on non-int type")
     | Div ->
-      (try 
-      check e1 TInt tenv;
-      check e2 TInt tenv;
-      TInt
-    with _ -> type_error_loc l "division performed on non-int type")
+      (try
+         check e1 TInt tenv;
+         check e2 TInt tenv;
+         TInt
+       with
+       | _ -> type_error_loc l "division performed on non-int type")
     | Rem ->
-      (try 
-      check e1 TInt tenv;
-      check e2 TInt tenv;
-      TInt
-    with _ -> type_error_loc l "modulo performed on non-int type")
+      (try
+         check e1 TInt tenv;
+         check e2 TInt tenv;
+         TInt
+       with
+       | _ -> type_error_loc l "modulo performed on non-int type")
     | Lt ->
-      (try 
-      check e1 TInt tenv;
-      check e2 TInt tenv;
-      TInt
-    with _ -> type_error_loc l "less than used on non-int type")
+      (try
+         check e1 TInt tenv;
+         check e2 TInt tenv;
+         TInt
+       with
+       | _ -> type_error_loc l "less than used on non-int type")
     | Le ->
-      (try 
-      check e1 TInt tenv;
-      check e2 TInt tenv;
-      TInt
-    with _ -> type_error_loc l "less than or equal used on non-int type")
+      (try
+         check e1 TInt tenv;
+         check e2 TInt tenv;
+         TInt
+       with
+       | _ -> type_error_loc l "less than or equal used on non-int type")
     | Gt ->
-      (try 
-      check e1 TInt tenv;
-      check e2 TInt tenv;
-      TInt
-    with _ -> type_error_loc l "greater than used on non-int type")
+      (try
+         check e1 TInt tenv;
+         check e2 TInt tenv;
+         TInt
+       with
+       | _ -> type_error_loc l "greater than used on non-int type")
     | Ge ->
-      (try 
-      check e1 TInt tenv;
-      check e2 TInt tenv;
-      TInt
-    with _ -> type_error_loc l "greater than or equal used on non-int type")
+      (try
+         check e1 TInt tenv;
+         check e2 TInt tenv;
+         TInt
+       with
+       | _ -> type_error_loc l "greater than or equal used on non-int type")
     | Eq | Neq ->
       let t1, t2 = type_expr e1 tenv, type_expr e2 tenv in
-      if t1 = t2 && t1 <> TVoid then TBool else type_error_loc l "(non-)equality tested on differing types"
+      if t1 = t2 && t1 <> TVoid
+      then TBool
+      else type_error_loc l "(non-)equality tested on differing types"
     | And ->
-      (try 
-      check e1 TInt tenv;
-      check e2 TInt tenv;
-      TInt
-    with _ -> type_error_loc l "logical and used on non-bool type")
+      (try
+         check e1 TInt tenv;
+         check e2 TInt tenv;
+         TInt
+       with
+       | _ -> type_error_loc l "logical and used on non-bool type")
     | Or ->
-      (try 
-      check e1 TInt tenv;
-      check e2 TInt tenv;
-      TInt
-    with _ -> type_error_loc l "logical or used on non-bool type")
+      (try
+         check e1 TInt tenv;
+         check e2 TInt tenv;
+         TInt
+       with
+       | _ -> type_error_loc l "logical or used on non-bool type")
   and find_overload cls m args tenv =
     let c_def = List.find (fun c -> c.class_name = cls) p.classes in
     let meths = List.filter (fun meth -> meth.method_name = m) c_def.methods in
@@ -223,9 +244,15 @@ let typecheck_prog p =
     | [ hd ] -> hd
     | hd :: hd' :: _ ->
       if score hd = score hd' then failwith "Ambiguous method call" else hd
-    | [] -> (match c_def.parent with 
-    | None -> failwith (Printf.sprintf "No matching function definition %s found for %s" (get_method_signature m (List.map (fun a -> type_expr a tenv) args)) cls)
-    | Some p -> find_overload p m args tenv)
+    | [] ->
+      (match c_def.parent with
+       | None ->
+         failwith
+           (Printf.sprintf
+              "No matching function definition %s found for %s"
+              (get_method_signature m (List.map (fun a -> type_expr a tenv) args))
+              cls)
+       | Some p -> find_overload p m args tenv)
   and check_meth_call e m args tag tenv =
     (*let rec find_method c m =
       let cdef = List.find (fun def -> def.class_name = c) p.classes in
@@ -321,7 +348,11 @@ let typecheck_prog p =
     | Expr e -> check e TVoid tenv
   and check_seq s ret tenv = List.iter (fun i -> check_instr i ret tenv) s
   and check_mdef mdef tenv =
-    check_seq mdef.code mdef.return (add_env mdef.locals tenv |> add_env (List.map (fun (a, b) -> a, b, None) mdef.params))
+    check_seq
+      mdef.code
+      mdef.return
+      (add_env mdef.locals tenv
+       |> add_env (List.map (fun (a, b) -> a, b, None) mdef.params))
   and check_class cdef tenv =
     List.iter
       (fun m -> check_mdef m (Env.add "this" (TClass cdef.class_name) tenv))

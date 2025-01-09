@@ -75,7 +75,7 @@ rule token = parse
   | "&&" { AND (make_pos lexbuf)}
   | "||" { OR (make_pos lexbuf)}
 
-  | "!"  { NOT }
+  | "!"  { NOT (make_pos lexbuf) }
 
   | "="  { ASSIGN }
 

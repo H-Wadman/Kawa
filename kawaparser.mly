@@ -14,7 +14,8 @@
 %token WHILE RETURN PRINT TINT TBOOL TVOID MAIN EXTENDS
 (*Symbols*)
 %token <Kawa.loc> PLUS MINUS STAR SLASH PERCENT EQ NEQ LT GT LE GE AND OR 
-%token NOT ASSIGN
+%token <Kawa.loc> NOT 
+%token ASSIGN
 
 %token DOT COMMA
 
@@ -122,9 +123,8 @@ mem:
 ;
 
 unop:
-  | NOT { Not }
-  (* Will give priorty issues later with Sub *)
-  | MINUS { Opp }
+  | l=NOT { Not, l }
+  | l=MINUS { Opp, l }
 ;
 
 %inline binop:

@@ -29,6 +29,8 @@ type unop =
   | Opp
   | Not
 
+type unop_loc = unop * loc
+
 type binop =
   | Add
   | Sub
@@ -44,15 +46,14 @@ type binop =
   | And
   | Or
 
-type binop_loc =
-  binop * loc
+type binop_loc = binop * loc
 
 (* Expressions *)
 type expr =
   (* Base arithmétique *)
   | Int of int
   | Bool of bool
-  | Unop of unop * expr
+  | Unop of unop_loc * expr
   | Binop of binop_loc * expr * expr
   (* Accès à une variable ou un attribut *)
   | Get of mem_access
