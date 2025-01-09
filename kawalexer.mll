@@ -2,6 +2,7 @@
 
   open Lexing
   open Kawaparser
+  open Kawa
 
   exception Error of string
 
@@ -31,6 +32,9 @@
     try  Hashtbl.find h s
     with Not_found -> IDENT(s)
 
+  
+  let make_pos lb = { start_p=lexeme_start_p lb; end_p=lexeme_end_p lb}
+
 }
 
 let digit = ['0'-'9']
@@ -57,19 +61,20 @@ rule token = parse
   | "]"  { RSQB }
 
   (*Binary op symbols*)
-  | "+"  { PLUS }
-  | "-"  { MINUS }
-  | "*"  { STAR }
-  | "/"  { SLASH }
-  | "%"  { PERCENT }
-  | "=="  { EQ }
-  | "!="  { NEQ }
-  | "<"  { LT }
-  | ">"  { GT }
-  | "<="  { LE }
-  | ">="  { GE }
-  | "&&" { AND }
-  | "||" { OR }
+  | "+"  { PLUS (make_pos lexbuf)}
+  | "-"  { MINUS (make_pos lexbuf)}
+  | "*"  { STAR (make_pos lexbuf)}
+  | "/"  { SLASH (make_pos lexbuf)}
+  | "%"  { PERCENT (make_pos lexbuf)}
+  | "=="  { EQ (make_pos lexbuf)}
+  | "!="  { NEQ (make_pos lexbuf)}
+  | "<"  { LT (make_pos lexbuf)}
+  | ">"  { GT (make_pos lexbuf)}
+  | "<="  { LE (make_pos lexbuf)}
+  | ">="  { GE (make_pos lexbuf)}
+  | "&&" { AND (make_pos lexbuf)}
+  | "||" { OR (make_pos lexbuf)}
+
   | "!"  { NOT }
 
   | "="  { ASSIGN }

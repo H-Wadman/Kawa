@@ -13,7 +13,8 @@
 %token TRUE FALSE VAR ATTRIBUTE METHOD CLASS NEW THIS IF ELSE
 %token WHILE RETURN PRINT TINT TBOOL TVOID MAIN EXTENDS
 (*Symbols*)
-%token PLUS MINUS STAR SLASH PERCENT EQ NEQ LT GT LE GE AND OR NOT ASSIGN
+%token <Kawa.loc> PLUS MINUS STAR SLASH PERCENT EQ NEQ LT GT LE GE AND OR 
+%token NOT ASSIGN
 
 %token DOT COMMA
 
@@ -127,19 +128,19 @@ unop:
 ;
 
 %inline binop:
-  | PLUS { Add }
-  | MINUS { Sub }
-  | STAR { Mul }
-  | SLASH { Div }
-  | PERCENT { Rem }
-  | EQ { Eq }
-  | NEQ { Neq }
-  | LT { Lt }
-  | GT { Gt }
-  | LE { Le }
-  | GE { Ge }
-  | AND { And }
-  | OR { Or }
+  | l=PLUS { Add l }
+  | l=MINUS { Sub l }
+  | l=STAR { Mul l }
+  | l=SLASH { Div l }
+  | l=PERCENT { Rem l }
+  | l=EQ { Eq l }
+  | l=NEQ { Neq l }
+  | l=LT { Lt l }
+  | l=GT { Gt l }
+  | l=LE { Le l }
+  | l=GE { Ge l }
+  | l=AND { And l }
+  | l=OR { Or l }
 ;
 
 

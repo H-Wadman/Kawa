@@ -1,5 +1,13 @@
 (** Kawa : un petit langage à objets inspiré de Java *)
 
+open Lexing
+
+type loc = 
+{
+  start_p: position
+  ; end_p: position
+}
+
 (* Types déclarés pour les attributs, pour les variables, et pour les
    paramètres et résultats des méthodes. *)
 type typ =
@@ -22,19 +30,19 @@ type unop =
   | Not
 
 type binop =
-  | Add
-  | Sub
-  | Mul
-  | Div
-  | Rem
-  | Lt
-  | Le
-  | Gt
-  | Ge
-  | Eq
-  | Neq
-  | And
-  | Or
+  | Add of loc
+  | Sub of loc
+  | Mul of loc
+  | Div of loc
+  | Rem of loc
+  | Lt of loc
+  | Le of loc
+  | Gt of loc
+  | Ge of loc
+  | Eq of loc
+  | Neq of loc
+  | And of loc
+  | Or of loc
 
 (* Expressions *)
 type expr =

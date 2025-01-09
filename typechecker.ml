@@ -61,6 +61,13 @@ let get_method_signature m args =
   Printf.sprintf "%s(%s)" m params
 ;;
 
+let type_error_loc (loc: loc) msg =
+  let line = loc.start_p.pos_lnum in
+  let start = loc.start_p.pos_cnum - loc.start_p.pos_bol + 1 in
+  let end_p = loc.end_p.pos_cnum - loc.end_p.pos_bol in
+  failwith (Printf.sprintf "Type error on line %d, characters %d-%d: %s" line start end_p msg)
+;;
+
 let check_subclass t base class_list =
   let get_class c = List.find (fun x -> x.class_name = c) class_list in
   let rec aux c_def base =
@@ -113,53 +120,75 @@ let typecheck_prog p =
     | _ -> failwith "Cannot subscript non-array"
   and check_binop op e1 e2 tenv =
     match op with
-    | Add ->
+    | Add l ->
+      (try 
       check e1 TInt tenv;
       check e2 TInt tenv;
       TInt
-    | Sub ->
+    with _ -> type_error_loc l "addition performed on non-int type")
+    | Sub l ->
+      (try 
       check e1 TInt tenv;
       check e2 TInt tenv;
       TInt
-    | Mul ->
+    with _ -> type_error_loc l "subtraction performed on non-int type")
+    | Mul l ->
+      (try 
       check e1 TInt tenv;
       check e2 TInt tenv;
       TInt
-    | Div ->
+    with _ -> type_error_loc l "multiplication performed on non-int type")
+    | Div l ->
+      (try 
       check e1 TInt tenv;
       check e2 TInt tenv;
       TInt
-    | Rem ->
+    with _ -> type_error_loc l "division performed on non-int type")
+    | Rem l ->
+      (try 
       check e1 TInt tenv;
       check e2 TInt tenv;
       TInt
-    | Lt ->
+    with _ -> type_error_loc l "modulo performed on non-int type")
+    | Lt l ->
+      (try 
       check e1 TInt tenv;
       check e2 TInt tenv;
-      TBool
-    | Le ->
+      TInt
+    with _ -> type_error_loc l "less than used on non-int type")
+    | Le l ->
+      (try 
       check e1 TInt tenv;
       check e2 TInt tenv;
-      TBool
-    | Gt ->
+      TInt
+    with _ -> type_error_loc l "less than or equal used on non-int type")
+    | Gt l ->
+      (try 
       check e1 TInt tenv;
       check e2 TInt tenv;
-      TBool
-    | Ge ->
+      TInt
+    with _ -> type_error_loc l "greater than used on non-int type")
+    | Ge l ->
+      (try 
       check e1 TInt tenv;
       check e2 TInt tenv;
-      TBool
-    | Eq | Neq ->
+      TInt
+    with _ -> type_error_loc l "greater than or equal used on non-int type")
+    | Eq l | Neq l ->
       let t1, t2 = type_expr e1 tenv, type_expr e2 tenv in
-      if t1 = t2 && t1 <> TVoid then TBool else failwith ""
-    | And ->
-      check e1 TBool tenv;
-      check e2 TBool tenv;
-      TBool
-    | Or ->
-      check e1 TBool tenv;
-      check e2 TBool tenv;
-      TBool
+      if t1 = t2 && t1 <> TVoid then TBool else type_error_loc l "(non-)equality tested on differing types"
+    | And l ->
+      (try 
+      check e1 TInt tenv;
+      check e2 TInt tenv;
+      TInt
+    with _ -> type_error_loc l "logical and used on non-bool type")
+    | Or l ->
+      (try 
+      check e1 TInt tenv;
+      check e2 TInt tenv;
+      TInt
+    with _ -> type_error_loc l "logical or used on non-bool type")
   and find_overload cls m args tenv =
     let c_def = List.find (fun c -> c.class_name = cls) p.classes in
     let meths = List.filter (fun meth -> meth.method_name = m) c_def.methods in
