@@ -17,6 +17,7 @@ fonction "typecheck_prog"
 - Tableaux implementés
 - Surcharge statique implementé (et message d'erreur donnant les listes d'arguments si methode pas trouvé)
 - Declarations initiales implementé
+- Pour l'insant, ne montre que la localisation d'une erreur de typage si cela concerne un opérateur binaire. Une autre branche WIP est utilisé pour implémenter des localisations plus ambitieuses.
 
 ## Todo
 - Disallow multiple declarations for same method (instead of taking the first)
