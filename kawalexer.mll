@@ -11,9 +11,9 @@
   List.iter (fun (s, k) -> Hashtbl.add h s k)
     [ "true",       TRUE;
       "false",      FALSE;
-      "var",        VAR;
+      (*"var",        VAR;
       "attribute",  ATTRIBUTE;
-      "method",     METHOD;
+      "method",     METHOD;*)
       "class",      CLASS;
       "new",        NEW;
       "this",       THIS;

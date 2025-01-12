@@ -4,13 +4,17 @@
 
   type cstructor = string * expr list
   type decl = typ * string
+  type member_decl = | AttrDecl of attr_decl | MethDecl of method_def
+  type method_content = VarDecl of var_decl | Code of instr
 %}
 
 %token <int> INT
 %token <string> IDENT
 
 (*Keywords except types*)
-%token TRUE FALSE VAR ATTRIBUTE METHOD CLASS NEW THIS IF ELSE
+(*%token VAR ATTRIBUTE METHOD*)
+
+%token TRUE FALSE CLASS NEW THIS IF ELSE
 %token WHILE RETURN PRINT TINT TBOOL TVOID MAIN EXTENDS
 (*Symbols*)
 %token <Kawa.loc> PLUS MINUS STAR SLASH PERCENT EQ NEQ LT GT LE GE AND OR 
@@ -48,14 +52,14 @@ decl:
   t=typ id=IDENT { t, id }
 
 variable_decl:
-| VAR d=decl SEMI
+| d=decl SEMI
   {
     let (t, id) = d in
     match t with
   | TVoid -> failwith "Cannot declare a variable of type void";
   | _ -> (id, t, None)
   }
-| VAR d=decl ASSIGN e=expression SEMI
+| d=decl ASSIGN e=expression SEMI
   {
     let (t, id) = d in
     match t with
@@ -65,7 +69,7 @@ variable_decl:
 ;
 
 attribute_decl:
-  | ATTRIBUTE d=decl SEMI
+  | d=decl SEMI
     {
       let (t, id) = d in
       (match t with
@@ -74,10 +78,19 @@ attribute_decl:
     }
 ;
 
+method_content:
+  | v=variable_decl { VarDecl v }
+  | i=instruction { Code i }
+
 method_def:
-  | METHOD d=decl LPAR args=separated_list(COMMA, decl) RPAR BEGIN
-    local=list(variable_decl) code=list(instruction) END
+  | d=decl LPAR args=separated_list(COMMA, decl) RPAR BEGIN
+    content=list(method_content) END
   {
+    (*local=list(variable_decl) code=list(instruction)*)
+    let local, code = List.partition_map (
+      fun x -> match x with 
+      | VarDecl v -> Left v
+      | Code i -> Right i) content in
     let (t, id) = d in
     let permute tup_lst =
       List.map (fun (one, two) -> (two, one)) tup_lst in
@@ -85,11 +98,27 @@ method_def:
   }
 ;
 
+member_decl:
+  | attr=attribute_decl { AttrDecl attr }
+  | meth=method_def { MethDecl meth }
+
 class_def:
-| CLASS id=IDENT BEGIN attr=list(attribute_decl) meth=list(method_def) END
-    { {class_name=id; attributes=attr; methods=meth; parent=None} }
-| CLASS id=IDENT EXTENDS prnt=IDENT BEGIN attr=list(attribute_decl) meth=list(method_def) END
-    { {class_name=id; attributes=attr; methods=meth; parent=(Some (prnt)) } }
+| CLASS id=IDENT BEGIN mems=list(member_decl) END
+    { 
+      let (attrs, meths) = List.partition_map (
+        fun x -> match x with 
+        | AttrDecl a -> Left a
+        | MethDecl m -> Right m) mems in
+      {class_name=id; attributes=attrs; methods=meths; parent=None} 
+    }
+| CLASS id=IDENT EXTENDS prnt=IDENT BEGIN mems=list(member_decl) END
+    { 
+      let (attrs, meths) = List.partition_map (
+        fun x -> match x with 
+        | AttrDecl a -> Left a
+        | MethDecl m -> Right m) mems in
+      {class_name=id; attributes=attrs; methods=meths; parent=(Some prnt)} 
+    }
 ;
 
 typ:

@@ -22,3 +22,4 @@ fonction "typecheck_prog"
 ## Todo
 - Disallow multiple declarations for same method (instead of taking the first)
 - Remove all asserts 
+- Make sure all local variable declarations come first in method_content in the parser!
