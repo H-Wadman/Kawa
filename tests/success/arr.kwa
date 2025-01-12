@@ -1,16 +1,30 @@
 var int[5] a;
 var int[1] b;
+var int[2][2] c;
 var int i;
 
 main {
     a = [2, 3, 4, 5, 6];
     b = [1];
+    c = new int[2][2];
+    i = 0;
+    while (i < 2) {
+        c[i] = [2*i + 7, 2*i + 8];
+        i = i + 1;
+    }
     
     print(b[0]);
     
     i = 0;
     while (i < 5) {
         print(a[i]);
+        i = i + 1;
+    }
+    
+    i = 0;
+    while (i < 2) {
+        print(c[i][0]);     
+        print(c[i][1]);
         i = i + 1;
     }
 }

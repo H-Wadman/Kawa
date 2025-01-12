@@ -42,9 +42,9 @@ let tag_methods cls_def =
   let s = StrSet.of_list m_names in
   StrSet.iter
     (fun m_name ->
-      (*Printf.printf "Tagging %s: %s\n%!" cls_def.class_name m_name;*)
-      let lst = List.filter (fun def -> def.method_name = m_name) cls_def.methods in
-      List.iteri (fun i elt -> elt.tag <- Some i) lst)
+       (*Printf.printf "Tagging %s: %s\n%!" cls_def.class_name m_name;*)
+       let lst = List.filter (fun def -> def.method_name = m_name) cls_def.methods in
+       List.iteri (fun i elt -> elt.tag <- Some i) lst)
     s
 ;;
 
@@ -81,6 +81,11 @@ let check_subclass t base class_list =
       | Some p -> aux (get_class p) base)
   in
   match t, base with
+  | TArray (t, s), TArray (t2, s2) ->
+    if t <> t2
+    then failwith "Array type mismatch"
+    else if s <> s2
+    then failwith "Array size mismatch"
   | TInt, _ | TBool, _ | TVoid, _ | TArray (_, _), _ ->
     if t <> base then failwith "Basic types cannot be subclasses"
   | TClass c, TClass c2 -> aux (get_class c) c2
@@ -168,28 +173,28 @@ let typecheck_prog p =
       (try
          check e1 TInt tenv;
          check e2 TInt tenv;
-         TInt
+         TBool
        with
        | _ -> type_error_loc l "less than used on non-int type")
     | Le ->
       (try
          check e1 TInt tenv;
          check e2 TInt tenv;
-         TInt
+         TBool
        with
        | _ -> type_error_loc l "less than or equal used on non-int type")
     | Gt ->
       (try
          check e1 TInt tenv;
          check e2 TInt tenv;
-         TInt
+         TBool
        with
        | _ -> type_error_loc l "greater than used on non-int type")
     | Ge ->
       (try
          check e1 TInt tenv;
          check e2 TInt tenv;
-         TInt
+         TBool
        with
        | _ -> type_error_loc l "greater than or equal used on non-int type")
     | Eq | Neq ->
@@ -218,18 +223,18 @@ let typecheck_prog p =
     let candidates =
       List.filter
         (fun m_def ->
-          if List.length m_def.params <> List.length args
-          then false
-          else
-            List.for_all2
-              (fun par a ->
-                try
-                  check_subclass (snd par) (type_expr a tenv) p.classes;
-                  true
-                with
-                | _ -> false)
-              m_def.params
-              args)
+           if List.length m_def.params <> List.length args
+           then false
+           else
+             List.for_all2
+               (fun par a ->
+                  try
+                    check_subclass (snd par) (type_expr a tenv) p.classes;
+                    true
+                  with
+                  | _ -> false)
+               m_def.params
+               args)
         meths
     in
     let score m_def =

@@ -55,8 +55,8 @@ let exec_prog (p : program) : unit =
       match e with
       | Int n -> VInt n
       | Bool b -> VBool b
-      | Unop (Opp, expr) -> VInt (-evali expr)
-      | Unop (Not, expr) -> VBool (not (evalb expr))
+      | Unop ((Opp, _), expr) -> VInt (-evali expr)
+      | Unop ((Not, _), expr) -> VBool (not (evalb expr))
       | Binop (bin, e1, e2) -> eval_binop bin e1 e2
       | NewArray (_, n) -> VArray (Array.make n Null)
       | Arr a -> VArray (Array.map eval a)
