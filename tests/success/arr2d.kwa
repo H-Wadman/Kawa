@@ -1,4 +1,4 @@
-var int[5][2] arr;
+int[5][2] arr;
 
 main {
     arr = new int[5][2];

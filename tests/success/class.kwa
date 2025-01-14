@@ -1,9 +1,9 @@
-var point a;
-var point b;
+point a;
+point b;
 
 class point {
-  attribute int x;
-  attribute int y;
+  int x;
+  int y;
 }
 
 main {

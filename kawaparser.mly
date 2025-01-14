@@ -23,6 +23,7 @@
 
 %token DOT COMMA
 
+%token AT
 %token LPAR RPAR BEGIN END SEMI LSQB RSQB
 %token EOF
 
@@ -78,8 +79,39 @@ attribute_decl:
     }
 ;
 
+local_typ:
+  | TVOID { TVoid }
+  | TINT { TInt }
+  | TBOOL { TBool }
+  | id=IDENT { TClass(id) }
+  | AT t=typ 
+    { 
+      match t with TArray(t, n) -> t | _ -> failwith "Array syntax used for non array type"
+    }
+;
+
+local_decl:
+  t=local_typ id=IDENT { t, id }
+
+local_variable_decl:
+| d=local_decl SEMI
+  {
+    let (t, id) = d in
+    match t with
+  | TVoid -> failwith "Cannot declare a variable of type void";
+  | _ -> (id, t, None)
+  }
+| d=local_decl ASSIGN e=expression SEMI
+  {
+    let (t, id) = d in
+    match t with
+  | TVoid -> failwith "Cannot declare a variable of type void";
+  | _ -> (id, t, Some e)
+  }
+;
+
 method_content:
-  | v=variable_decl { VarDecl v }
+  | v=local_variable_decl { VarDecl v }
   | i=instruction { Code i }
 
 method_def:
@@ -87,6 +119,22 @@ method_def:
     content=list(method_content) END
   {
     (*local=list(variable_decl) code=list(instruction)*)
+    let rec verify_order lst =
+      let rec aux l = 
+        match l with 
+        | [] -> ()
+        | hd :: tl -> (match hd with 
+          | VarDecl _ -> failwith "Variable declaration must be at the beginning of a method"
+          | _ -> aux tl) 
+      in
+      match lst with 
+      | [] -> () 
+      | hd :: tl -> (match hd with 
+        | VarDecl _ -> verify_order tl
+        | _ -> aux tl)
+    in
+    verify_order content;
+
     let local, code = List.partition_map (
       fun x -> match x with 
       | VarDecl v -> Left v

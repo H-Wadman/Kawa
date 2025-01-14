@@ -18,8 +18,7 @@ fonction "typecheck_prog"
 - Surcharge statique implementé (et message d'erreur donnant les listes d'arguments si methode pas trouvé)
 - Declarations initiales implementé
 - Pour l'insant, ne montre que la localisation d'une erreur de typage si cela concerne un opérateur binaire. Une autre branche WIP est utilisé pour implémenter des localisations plus ambitieuses.
+- Déclarations multiple de même signature pas autorisées
 
 ## Todo
-- Disallow multiple declarations for same method (instead of taking the first)
 - Remove all asserts 
-- Make sure all local variable declarations come first in method_content in the parser!

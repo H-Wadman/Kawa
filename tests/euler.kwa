@@ -1,36 +1,36 @@
-var vec primes;
-var prime p;
-var int i;
-var solution sol;
-var int temp;
-var int lim;
-var bool _;
+vec primes;
+prime p;
+int i;
+solution sol;
+int temp;
+int lim;
+bool _;
 
 
 class vec {
-    attribute int size;
-    attribute int[1000000] arr;
+    int size;
+    int[1000000] arr;
 
-    method void constructor() {
+    void constructor() {
         this.size = 0;
         this.arr = new int[1000000];
     }
 
-    method void push(int elt) {
+    void push(int elt) {
         this.arr[this.size] = elt;
         this.size = this.size + 1;
     }
 
-    method int pop() {
+    int pop() {
         this.size = this.size - 1;
         return this.arr[this.size];
     }
 
-    method int at(int i) {
+    int at(int i) {
         return this.arr[i];
     }
 
-    method bool has(int elt) {
+    bool has(int elt) {
         var int i;
         i = 0;
 
@@ -45,10 +45,10 @@ class vec {
         return false;
     }
 
-    method bool bin(int elt) {
-        var int hi;
-        var int lo;
-        var int temp;
+    bool bin(int elt) {
+        int hi;
+        int lo;
+        int temp;
 
         lo = 0;
         hi = this.size;
@@ -73,10 +73,10 @@ class vec {
 }
 
 class pair {
-    attribute int x;
-    attribute int y;
+    int x;
+    int y;
 
-    method void constructor(int x, int y) {
+    void constructor(int x, int y) {
         this.x = x;
         this.y = y;
     }
@@ -84,8 +84,8 @@ class pair {
 
 class prime {
     //square root rounded up
-    method int sqrt(int n) {
-        var int i;
+    int sqrt(int n) {
+        int i;
         i = 1;
         while (i * i < n) {
             i = i + 1;
@@ -94,9 +94,9 @@ class prime {
         return i;
     } 
 
-    method bool is_prime(int n) {
-        var int i;
-        var int sqrt;
+    bool is_prime(int n) {
+        int i;
+        int sqrt;
         i = 2;
 
         sqrt = this.sqrt(n);
@@ -113,10 +113,10 @@ class prime {
 
 class solution {
     
-    method pair consecutive(vec p, int i, int lim) {
-        var int j;
-        var int sum;
-        var pair res;
+    pair consecutive(vec p, int i, int lim) {
+        int j;
+        int sum;
+        pair res;
 
         res = new pair(0, 0);
         sum = 0;
@@ -136,7 +136,7 @@ class solution {
 
         return res;
     }
-    method int solve(vec p, int lim) {
+    int solve(vec p, int lim) {
         var int max;
         var int res;
         var pair curr;

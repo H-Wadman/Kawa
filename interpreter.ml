@@ -77,23 +77,23 @@ let exec_prog (p : program) : unit =
       | NewCstr (cls, args, tag) ->
         let c_def = List.find (fun c -> c.class_name = cls) p.classes in
         let obj = evalo (New cls) in
-        assert (Option.is_some !tag);
+        (*assert (Option.is_some !tag);*)
         let cstr =
           List.find
             (fun m ->
-              assert (Option.is_some m.tag);
+              (*assert (Option.is_some m.tag);*)
               m.method_name = "constructor" && m.tag = !tag)
             c_def.methods
         in
         eval_call cstr obj (eval_args args) |> ignore;
         VObj obj
       | MethCall (e, name, args, tag) ->
-        assert (Option.is_some !tag);
+        (*assert (Option.is_some !tag);*)
         let o = evalo e in
         let rec find_method c m =
           let c_def = List.find (fun c_def -> c_def.class_name = c) p.classes in
           let comp meth =
-            assert (Option.is_some meth.tag);
+            (*assert (Option.is_some meth.tag);*)
             meth.method_name = m && meth.tag = !tag
           in
           if List.exists comp c_def.methods
@@ -128,7 +128,7 @@ let exec_prog (p : program) : unit =
     in
     let rec exec (i : instr) : unit =
       match i with
-      | Print e -> Printf.printf "Debug: %d\n%!" (evali e)
+      | Print e -> Printf.printf "%d\n" (evali e)
       | Set (Var s, e) ->
         if Hashtbl.mem lenv s
         then Hashtbl.replace lenv s (eval e)

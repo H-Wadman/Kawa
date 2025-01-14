@@ -87,7 +87,7 @@ let check_subclass t base class_list =
     else if s <> s2
     then failwith "Array size mismatch"
   | TInt, _ | TBool, _ | TVoid, _ | TArray (_, _), _ ->
-    if t <> base then failwith "Basic types cannot be subclasses"
+    if t <> base then failwith (Printf.sprintf "Basic types cannot be subclasses (%s, %s)" (typ_to_string t) (typ_to_string base))
   | TClass c, TClass c2 -> aux (get_class c) c2
   | _, _ -> failwith "Class cannot inherit from non-class types"
 ;;

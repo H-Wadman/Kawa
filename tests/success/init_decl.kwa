@@ -1,10 +1,10 @@
-var int x = 1;
-var int y = 6;
-var test t = new test;
+int x = 1;
+int y = 6;
+test t = new test;
 
 class test {
-  method int foo(int x) {
-    var int z = 2;
+  int foo(int x) {
+    int z = 2;
     return x + 2;
   }
 }

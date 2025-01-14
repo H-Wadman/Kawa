@@ -1,7 +1,7 @@
-var int[5] a;
-var int[1] b;
-var int[2][2] c;
-var int i;
+int[5] a;
+int[1] b;
+int[2][2] c;
+int i;
 
 main {
     a = [2, 3, 4, 5, 6];

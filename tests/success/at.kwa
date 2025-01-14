@@ -1,0 +1,20 @@
+test t;
+foo foo;
+
+class foo {
+    int f;
+    void constructor(int f) { this.f = f; }
+}
+
+class test {
+    void m(foo f) {
+        int k = f.f;
+        foo = f;
+    }
+}
+
+main {
+    foo = new foo(2);
+    t = new test;
+    t.m(foo);
+}

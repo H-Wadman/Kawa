@@ -1,27 +1,27 @@
-var paire p;
-var paire pt;
-var triple t;
-var int k;
+paire p;
+paire pt;
+triple t;
+int k;
 
 class paire {
-  attribute int x;
-  attribute int y;
+  int x;
+  int y;
 
-  method void constructor(int x, int y) {
+  void constructor(int x, int y) {
     this.x = x;
     this.y = y;
   }
 
-  method int somme() {
+  int somme() {
     return this.x + this.y;
   }
 }
 
 class triple extends paire {
-  attribute int z;
+  int z;
 
-  method void constructor(int x, int y, int z) {
-    var int c;
+  void constructor(int x, int y, int z) {
+    int c;
     
     print(k);
     c = 5;
@@ -35,7 +35,7 @@ class triple extends paire {
     this.z = z;
   }
 
-  method int produit() {
+  int produit() {
     return this.x * this.y * this.z;
   }
 }
